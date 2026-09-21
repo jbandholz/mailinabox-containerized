@@ -45,6 +45,18 @@ Once inside the VM, you can re-run individual parts of the setup like in this ex
 
 Mail-in-a-Box needs more tests. If you're still looking for a way to help out, writing and contributing tests would be a great start!
 
+### Upstream synchronization
+
+The `trunk` branch is an upstream-aligned baseline. From a clean working tree on `containerized`, synchronize and publish it with:
+
+    $ tools/sync-upstream.sh
+
+In Devin CLI, the project skill provides the equivalent prompt shortcut:
+
+    /sync-upstream
+
+The command fetches `upstream/main` into the local repository, fast-forwards local `trunk`, and publishes it to `origin/trunk`. It rejects dirty worktrees and branch divergence, never force-pushes, and restores the branch from which it was invoked. It does not merge into or publish `containerized`; incorporating an updated `trunk` into containerization work is a separate, deliberate step.
+
 ## Public domain
 
 This project is in the public domain. Copyright and related rights in the work worldwide are waived through the [CC0 1.0 Universal public domain dedication][CC0]. See the LICENSE file in this directory.
