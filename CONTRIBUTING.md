@@ -57,6 +57,12 @@ In Devin CLI, the project skill provides the equivalent prompt shortcut:
 
 The command fetches `upstream/main` into the local repository, fast-forwards local `trunk`, and publishes it to `origin/trunk`. It rejects dirty worktrees and branch divergence, never force-pushes, and restores the branch from which it was invoked. It does not merge into or publish `containerized`; incorporating an updated `trunk` into containerization work is a separate, deliberate step.
 
+To synchronize, review, and publish the containerized branch, invoke:
+
+    /update-containerized
+
+This workflow first requires a completely clean working tree. If staged, unstaged, or untracked changes exist, it lists them and aborts before fetching or changing branches; commit or otherwise resolve those changes first. It synchronizes `trunk` when necessary, prepares an explicit merge into `containerized`, and pauses before committing or pushing. After approval, it commits the merge when needed and publishes `containerized` to GitHub.
+
 ## Public domain
 
 This project is in the public domain. Copyright and related rights in the work worldwide are waived through the [CC0 1.0 Universal public domain dedication][CC0]. See the LICENSE file in this directory.
