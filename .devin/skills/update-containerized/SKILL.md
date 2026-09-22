@@ -30,9 +30,10 @@ Follow this workflow exactly. Never force-push, reset, rebase, stash, discard ch
     - **Leave prepared** — stop with the uncommitted merge intact for manual work and report that the working tree is intentionally not clean. Do not commit or push.
     Treat a skipped or ambiguous response as **Leave prepared**.
 14. When no blocking findings remain, show the final staged diff statistics, review findings, unresolved risks, verification results, and the proposed commit message `Merge trunk into containerized`. If no merge was needed, state that approval will publish the existing local-only commits without creating a commit.
-15. Pause with a structured single-choice question offering **Commit and push**, **Abort**, and, when a merge is prepared, **Leave prepared**. Do not commit or push until the user explicitly selects **Commit and push**.
-16. If the user selects **Abort**, run `git merge --abort` only when a merge is in progress, then report that nothing was committed or pushed and stop. If the user selects **Leave prepared**, stop with the merge intact and do not commit or push. Treat a skipped or ambiguous response as **Abort** when no merge is prepared and as **Leave prepared** when a merge is prepared.
-17. If approved and a merge is in progress, commit it with exactly:
+15. Perform a private-information review of everything about to be published — `git diff origin/containerized..containerized` covering all outgoing commits, plus the staged merge and any fixups if a merge is prepared. Look for secrets, credentials, private keys, tokens, passwords, API keys, `.env` contents, personal data beyond public commit identity, internal hostnames/IPs/paths, private URLs, and other non-public material. Report every suspect location with file and line, or state that no private information was detected. If any findings exist, pause with a structured single-choice question offering **Publish anyway** and **Abort**; do not continue until the user explicitly selects **Publish anyway**. Treat a skipped or ambiguous response as **Abort**. If the user selects **Abort**, run `git merge --abort` only when a merge is in progress, report that nothing was pushed, and stop.
+16. Pause with a structured single-choice question offering **Commit and push**, **Abort**, and, when a merge is prepared, **Leave prepared**. Include the private-information review result in the question context. Do not commit or push until the user explicitly selects **Commit and push**.
+17. If the user selects **Abort**, run `git merge --abort` only when a merge is in progress, then report that nothing was committed or pushed and stop. If the user selects **Leave prepared**, stop with the merge intact and do not commit or push. Treat a skipped or ambiguous response as **Abort** when no merge is prepared and as **Leave prepared** when a merge is prepared.
+18. If approved and a merge is in progress, commit it with exactly:
 
     ```text
     Merge trunk into containerized
@@ -42,5 +43,5 @@ Follow this workflow exactly. Never force-push, reset, rebase, stash, discard ch
     Co-Authored-By: Devin <158243242+devin-ai-integration[bot]@users.noreply.github.com>
     ```
 
-18. Push with `git push origin containerized`. Never force-push. If the push fails, retain the local commit and report that publication is pending; do not reset or rewrite history.
-19. Fetch `origin/containerized`, verify it resolves to the same commit as local `containerized`, verify the working tree is clean, and verify `containerized` remains checked out. Report whether trunk was synchronized, whether a merge commit was created, whether semantic fixups were included, the published commit, and the final branch.
+19. Push with `git push origin containerized`. Never force-push. If the push fails, retain the local commit and report that publication is pending; do not reset or rewrite history.
+20. Fetch `origin/containerized`, verify it resolves to the same commit as local `containerized`, verify the working tree is clean, and verify `containerized` remains checked out. Report whether trunk was synchronized, whether a merge commit was created, whether semantic fixups were included, the private-information review result, the published commit, and the final branch.
