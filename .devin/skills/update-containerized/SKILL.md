@@ -1,6 +1,6 @@
 ---
 name: update-containerized
-description: Synchronize trunk, review its integration into containerized, and publish after approval
+description: Synchronize trunk, semantically review its integration into containerized, and publish after approval
 triggers:
   - user
 ---
@@ -16,10 +16,23 @@ Follow this workflow exactly. Never force-push, reset, rebase, stash, discard ch
 7. Require `origin/containerized` to be an ancestor of local `containerized`. If it is not, report that GitHub is ahead or divergent and stop without pulling, resetting, rebasing, committing, or pushing.
 8. Record the current local and remote `containerized` commits. Show commits in `containerized..trunk` and `origin/containerized..containerized`.
 9. If `trunk` is not already an ancestor of `containerized`, run `git merge --no-commit --no-ff trunk`. If the merge conflicts, immediately run `git merge --abort`, report the conflict, and stop without committing or pushing. If `trunk` is already an ancestor, do not create an empty merge.
-10. Run `git diff --cached --check`. Show `git status --short`, `git diff --cached --stat`, and all commits that will be published with `git log --oneline origin/containerized..containerized`. If a merge is prepared, state that the proposed commit message is `Merge trunk into containerized`. If no merge is needed, state that approval will publish the existing local-only commits without creating a commit.
-11. Pause with a structured single-choice question offering **Commit and push** and **Abort**. Do not commit or push until the user explicitly selects **Commit and push**.
-12. If the user selects **Abort**, run `git merge --abort` only when a merge is in progress, then report that nothing was committed or pushed and stop. Treat a skipped or ambiguous response as **Abort**.
-13. If approved and a merge is in progress, commit it with exactly:
+10. Run `git diff --cached --check`. Show `git status --short`, `git diff --cached --stat`, and all commits that will be published with `git log --oneline origin/containerized..containerized`.
+11. If a merge is prepared, perform a semantic review before offering commit approval:
+    - Read every incoming commit in `containerized..trunk` and inspect the complete staged merge with `git diff --cached`.
+    - For each changed interface, function signature, file path, service, command, package, port, permission, environment variable, storage path, or startup assumption, trace affected callers, references, configuration, and containerization-specific behavior.
+    - Look specifically for changes that merge cleanly as text but conflict logically with Podman, Kubernetes, container builds, manifests, mounted storage, networking, health checks, or service lifecycle handling.
+    - Discover and run the narrowest relevant syntax checks, tests, linters, or configuration validation supported by the affected files. Do not run a check expected to rewrite tracked files.
+    - Report blocking problems, recommended fixups, unresolved risks, and every verification command with its result. Do not claim the merge is semantically safe merely because Git merged it without conflicts.
+12. If the semantic review finds a blocking problem or required fixup, pause with a structured single-choice question offering **Apply fixups**, **Abort merge**, and **Leave prepared**. Do not edit, commit, or push before this choice.
+13. Handle the review choice as follows:
+    - **Apply fixups** — make only the approved fixes in the still-uncommitted merge, stage them, and repeat steps 10–12 until no blocking findings remain. Include the fixups in the semantic review and final staged diff.
+    - **Abort merge** — run `git merge --abort`, report that nothing was committed or pushed, and stop.
+    - **Leave prepared** — stop with the uncommitted merge intact for manual work and report that the working tree is intentionally not clean. Do not commit or push.
+    Treat a skipped or ambiguous response as **Leave prepared**.
+14. When no blocking findings remain, show the final staged diff statistics, review findings, unresolved risks, verification results, and the proposed commit message `Merge trunk into containerized`. If no merge was needed, state that approval will publish the existing local-only commits without creating a commit.
+15. Pause with a structured single-choice question offering **Commit and push**, **Abort**, and, when a merge is prepared, **Leave prepared**. Do not commit or push until the user explicitly selects **Commit and push**.
+16. If the user selects **Abort**, run `git merge --abort` only when a merge is in progress, then report that nothing was committed or pushed and stop. If the user selects **Leave prepared**, stop with the merge intact and do not commit or push. Treat a skipped or ambiguous response as **Abort** when no merge is prepared and as **Leave prepared** when a merge is prepared.
+17. If approved and a merge is in progress, commit it with exactly:
 
     ```text
     Merge trunk into containerized
@@ -29,5 +42,5 @@ Follow this workflow exactly. Never force-push, reset, rebase, stash, discard ch
     Co-Authored-By: Devin <158243242+devin-ai-integration[bot]@users.noreply.github.com>
     ```
 
-14. Push with `git push origin containerized`. Never force-push. If the push fails, retain the local commit and report that publication is pending; do not reset or rewrite history.
-15. Fetch `origin/containerized`, verify it resolves to the same commit as local `containerized`, verify the working tree is clean, and verify `containerized` remains checked out. Report whether trunk was synchronized, whether a merge commit was created, the published commit, and the final branch.
+18. Push with `git push origin containerized`. Never force-push. If the push fails, retain the local commit and report that publication is pending; do not reset or rewrite history.
+19. Fetch `origin/containerized`, verify it resolves to the same commit as local `containerized`, verify the working tree is clean, and verify `containerized` remains checked out. Report whether trunk was synchronized, whether a merge commit was created, whether semantic fixups were included, the published commit, and the final branch.

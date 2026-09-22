@@ -61,7 +61,7 @@ To synchronize, review, and publish the containerized branch, invoke:
 
     /update-containerized
 
-This workflow first requires a completely clean working tree. If staged, unstaged, or untracked changes exist, it lists them and aborts before fetching or changing branches; commit or otherwise resolve those changes first. It synchronizes `trunk` when necessary, prepares an explicit merge into `containerized`, and pauses before committing or pushing. After approval, it commits the merge when needed and publishes `containerized` to GitHub.
+This workflow first requires a completely clean working tree. If staged, unstaged, or untracked changes exist, it lists them and aborts before fetching or changing branches; commit or otherwise resolve those changes first. It synchronizes `trunk` when necessary and prepares an explicit merge into `containerized`. Before approval, it reviews the staged merge for logical and semantic integration problems, traces affected container behavior, and runs targeted validation. Blocking findings can be fixed and reviewed again, aborted, or left prepared for manual work. Only after the review has no blocking findings and approval is granted does it commit the merge and publish `containerized` to GitHub.
 
 ## Public domain
 
